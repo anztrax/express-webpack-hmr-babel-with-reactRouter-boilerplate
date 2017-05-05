@@ -2,9 +2,10 @@ const path = require('path');
 const merge = require('webpack-merge');
 const parts = require('../../libs/parts');
 
-const dist = path.join(__dirname, '../../dist');
 const PATHS = {
-  serverApp : path.join(__dirname,'../../server.js'),
+  dist : path.join(__dirname, '../../dist'),
+  serverRenderer : path.join(__dirname,'../../render/serverRenderer.js'),
+  appPath : path.join(__dirname,'../../app'),
   moduleList : [
     {
       from : path.join(__dirname, '../../node_modules/monaco-editor/min/vs'),
@@ -17,9 +18,9 @@ const serverConfig = merge(
   {
     name: 'server',
     target: 'node',
-    entry: PATHS.serverApp,
+    entry: PATHS.serverRenderer,
     output: {
-      path: dist,
+      path: PATHS.dist,
       filename: 'server.js',
       libraryTarget: 'commonjs2'
     },
@@ -28,10 +29,11 @@ const serverConfig = merge(
       extensions : ['.js','.jsx']
     },
   },
-  parts.loadJSX(PATHS.clientApp),
-  parts.copyModule(PATHS.moduleList),
-  parts.setupCSS(PATHS.style),
-  parts.enableReactPerformanceTools()
+  parts.loadJSX([
+    PATHS.appPath,
+    PATHS.serverRenderer
+  ]),
+  parts.copyModule(PATHS.moduleList)
 );
 
 module.exports = serverConfig;

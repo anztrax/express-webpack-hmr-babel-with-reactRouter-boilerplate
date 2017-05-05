@@ -1,43 +1,23 @@
-import React from 'react';
-import ReactDOMServer from 'react-dom/server';
-import { StaticRouter } from 'react-router'
-import App from './app';
+import express from 'express';
+import webpack from 'webpack';
+import webpackDevMiddleware from 'webpack-dev-middleware';
+import webpackHotServerMiddleware from 'webpack-hot-server-middleware';
+import config from './config/webpack/webpack.config.js';
+import serverConfig from './config/server';
+const app = express();
 
+const compiler = webpack(config);
 
-//serverRenderer
-export default ({ clientStats, serverStats, foo }) => {
-  return (req, res, next) => {
-    const context = {};
+app.use(webpackDevMiddleware(compiler, {
+  noInfo: true
+}));
 
-    const html = ReactDOMServer.renderToString(
-      <StaticRouter
-        location={req.url}
-        context={foo}
-      >
-        <App />
-      </StaticRouter>
-    );
+app.use(webpackHotServerMiddleware(compiler, {
+  serverRendererOptions: {
+    foo: 'Bar'
+  }
+}));
 
-    if (context.url) {
-      res.writeHead(301, {
-        Location: context.url
-      });
-      res.end();
-
-    } else {
-      res.status(200).send(`
-          <!doctype html>
-          <html>
-          <head>
-              <title>${foo}</title>
-              <script src="/show/vs/loader.js"></script>
-          </head>
-          <body>
-              <div id="root">${html}</div>
-              <script src="/client.js"></script>
-          </body>
-          </html>
-      `);
-    }
-  };
-}
+app.listen(serverConfig.PORT, () => {
+  console.log(`Server started: http://localhost:${serverConfig.PORT}/`);
+});

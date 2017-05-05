@@ -2,9 +2,9 @@ const path = require('path');
 const merge = require('webpack-merge');
 const parts = require('../../libs/parts');
 
-const dist = path.join(__dirname, '../../dist');
 const PATHS = {
-  clientApp : path.join(__dirname,'../../client.js'),
+  dist : path.join(__dirname, '../../dist'),
+  clientRenderer : path.join(__dirname,'../../render/clientRenderer.js'),
   appPath : path.join(__dirname,'../../app'),
   moduleList : [
     {
@@ -18,9 +18,9 @@ const clientConfig = merge(
   {
     name: 'client',
     target: 'web',
-    entry: PATHS.clientApp,
+    entry: PATHS.clientRenderer,
     output: {
-      path: dist,
+      path: PATHS.dist,
       filename: 'client.js'
     },
     devtool: 'source-map',
@@ -29,12 +29,10 @@ const clientConfig = merge(
     },
   },
   parts.loadJSX([
-    PATHS.clientApp,
+    PATHS.clientRenderer,
     PATHS.appPath
   ]),
-  parts.copyModule(PATHS.moduleList),
-  parts.setupCSS(PATHS.style),
-  parts.enableReactPerformanceTools()
+  parts.copyModule(PATHS.moduleList)
 );
 
 module.exports = clientConfig;
